@@ -1,8 +1,10 @@
-from bs4 import BeautifulSoup
-import requests
 import random
 import re
 import socket
+
+import requests
+from bs4 import BeautifulSoup
+
 from . import settings
 
 
@@ -34,7 +36,7 @@ def getproxies(file_path=None, proxynova=True):
             for lines in soup.findAll("tr"):  # tr vitrs ko sap nikalne
                 if (
                     len(lines.findAll("td")) == 7
-                ):  ## tr vitra ko td haru josko length chai 8 xa
+                ):  # tr vitra ko td haru josko length chai 8 xa
                     content = lines.contents[1].contents[1].contents[1].contents[0]
                     pattern = r"'([A-Za-z0-9_\./\\-]*)'"
                     ip = re.search(pattern, content).group()
@@ -157,50 +159,3 @@ def create_proxyauth_extension(
         zp.writestr("background.js", background_js)
 
     return plugin_path
-
-
-if __name__ == "__main__":
-    import os
-    import sys
-    from contextlib import contextmanager
-
-    @contextmanager
-    def stdout_redirected(to=os.devnull):
-        """
-        import os
-
-        with stdout_redirected(to=filename):
-            print("from Python")
-            os.system("echo non-Python applications are also supported")
-        """
-        fd = sys.stdout.fileno()
-
-        ##### assert that Python and C stdio write using the same file descriptor
-        ####assert libc.fileno(ctypes.c_void_p.in_dll(libc, "stdout")) == fd == 1
-
-        def _redirect_stdout(to):
-            sys.stdout.close()  # + implicit flush()
-            os.dup2(to.fileno(), fd)  # fd writes to 'to' file
-            sys.stdout = os.fdopen(fd, "w")  # Python writes to fd
-
-        with os.fdopen(os.dup(fd), "w") as old_stdout:
-            with open(to, "w") as file:
-                _redirect_stdout(to=file)
-            try:
-                yield  # allow code to be run with the redirected stdout
-            finally:
-                _redirect_stdout(to=old_stdout)  # restore stdout.
-                # buffering and flags such as
-                # CLOEXEC may be different
-
-    import ctypes
-
-    libc = ctypes.CDLL(None)
-    print("here")
-    libc.puts(b"here from C")
-
-    with stdout_redirected():
-        print("Python print output")
-        libc.puts(b"This comes from C")
-        os.system("echo and this is from echo")
-        # raise ("Error Error")
