@@ -1,0 +1,16 @@
+.vscode
+vscode/**
+__pycache__
+__pycache__/**
+
+*.log
+.*_creds
+*.credentials
+
+*.exe
+phantomjs-windows/
+phantomjs-windows/**
+
+.archive
+.archive/**
+*.zip
