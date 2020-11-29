@@ -1,6 +1,6 @@
 # Headless YouTube Subscriber Bot
 
-!['YouTube']("./youtube.jpg")
+![YouTube](./youtube.jpg)
 
 ## Project Structure
 
