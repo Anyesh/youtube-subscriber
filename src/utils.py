@@ -9,10 +9,8 @@ from . import settings
 
 
 def loadUserAgents(ua_path):
-    UAList = []
     UAFile = open(ua_path, "r")
-    for UserAgents in UAFile:
-        UAList.append(UserAgents.strip())
+    UAList = [UserAgents.strip() for UserAgents in UAFile]
     random.shuffle(UAList)
     return UAList
 
@@ -26,49 +24,44 @@ def getproxies(file_path=None, proxynova=True):
 
         proxies = [x.strip("\n") for x in data]
 
-    else:
-        if proxynova:
-            print("Using Proxynova")
+    elif proxynova:
+        print("Using Proxynova")
 
-            data = requests.get("https://www.proxynova.com/proxy-server-list/")
-            raw = data.content
-            soup = BeautifulSoup(raw, "html.parser")
-            for lines in soup.findAll("tr"):  # tr vitrs ko sap nikalne
-                if (
+        data = requests.get("https://www.proxynova.com/proxy-server-list/")
+        raw = data.content
+        soup = BeautifulSoup(raw, "html.parser")
+        for lines in soup.findAll("tr"):  # tr vitrs ko sap nikalne
+            if (
                     len(lines.findAll("td")) == 7
                 ):  # tr vitra ko td haru josko length chai 8 xa
-                    content = lines.contents[1].contents[1].contents[1].contents[0]
-                    pattern = r"'([A-Za-z0-9_\./\\-]*)'"
-                    ip = re.search(pattern, content).group()
+                content = lines.contents[1].contents[1].contents[1].contents[0]
+                ip = re.search(r"'([A-Za-z0-9_\./\\-]*)'", content).group()
 
-                    try:
-                        ip = eval(ip)
-                    except Exception as e:
-                        print("Invalid IP during eval: ", e)
-                        continue
+                try:
+                    ip = eval(ip)
+                except Exception as e:
+                    print("Invalid IP during eval: ", e)
+                    continue
 
-                    try:
-                        socket.inet_aton(ip)
-                    except Exception as e:
-                        print("Invalid IP after eval: ", e)
-                        continue
+                try:
+                    socket.inet_aton(ip)
+                except Exception as e:
+                    print("Invalid IP after eval: ", e)
+                    continue
 
-                    proxies.append(
-                        str(ip) + ":" + lines.contents[3].contents[0].strip()
-                    )
+                proxies.append(f"{str(ip)}:{lines.contents[3].contents[0].strip()}")
 
-        else:
-            print("Using SSL Proxies")
-            data = requests.get("http://sslproxies.org/")
-            raw = data.content
-            soup = BeautifulSoup(raw, "html.parser")
-            for lines in soup.findAll("tr"):
-                if len(lines.findAll("td")) == 8:
-                    proxies.append(
-                        lines.contents[0].contents[0]
-                        + ":"
-                        + lines.contents[1].contents[0]
-                    )
+    else:
+        print("Using SSL Proxies")
+        data = requests.get("http://sslproxies.org/")
+        raw = data.content
+        soup = BeautifulSoup(raw, "html.parser")
+        proxies.extend(
+            lines.contents[0].contents[0] + ":" + lines.contents[1].contents[0]
+            for lines in soup.findAll("tr")
+            if len(lines.findAll("td")) == 8
+        )
+
     random.shuffle(proxies)
     return proxies
 

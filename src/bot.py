@@ -55,11 +55,10 @@ def try_credentials(first_name, last_name, username, password):
         )
         logger.info("viewing from ip {}", p_proxy[0])
         chrome_options.add_extension(proxyauth_plugin_path)
+    elif settings.SOCKS:
+        chrome_options.add_argument(f"--proxy-server=socks5://{proxy}")
     else:
-        if settings.SOCKS:
-            chrome_options.add_argument("--proxy-server=socks5://%s" % proxy)
-        else:
-            chrome_options.add_argument("--proxy-server=%s" % proxy)
+        chrome_options.add_argument(f"--proxy-server={proxy}")
 
     logger.info("Initiating browser!")
 
@@ -148,8 +147,6 @@ def try_credentials(first_name, last_name, username, password):
             time.sleep(3)
         except:
             logger.info("No agreement page! moving on.")
-            pass
-
         time.sleep(3)
         logger.info("Launching YouTube")
         browser.get("https://www.youtube.com/")
@@ -158,7 +155,7 @@ def try_credentials(first_name, last_name, username, password):
         logger.info("We are currently at {} page!", host)
 
         fail_cnt = 0
-        is_failed = False if "youtube" in host.lower() else True
+        is_failed = "youtube" not in host.lower()
 
         while is_failed:
             logger.info("Youtube not loaded! loading.. .")
@@ -187,7 +184,7 @@ def try_credentials(first_name, last_name, username, password):
 
         if (
             not settings.UNSUBSCRIBE
-            and not first_name.lower() in str(browser.title).lower()
+            and first_name.lower() not in str(browser.title).lower()
         ):
 
             logger.info("Finding 'GET STARTED' button.. .")
@@ -203,7 +200,7 @@ def try_credentials(first_name, last_name, username, password):
             ).click()
             # logger.info(select_button)
             time.sleep(5)
-            while not "studio" in str(browser.title).lower():
+            while "studio" not in str(browser.title).lower():
                 time.sleep(1)
             logger.info("User's channel created!")
 
